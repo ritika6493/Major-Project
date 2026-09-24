@@ -1,0 +1,139 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row my-4">
+    <div class="col-12 col-md-10 col-lg-8 mx-auto">
+        <div class="p-4 p-md-5 rounded-4 shadow-sm" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+            <div class="mb-4">
+                <span class="wl-badge wl-badge--verified mb-2">Listing Management</span>
+                <h1 class="wl-display wl-h2">Edit Listing Details</h1>
+                <p class="wl-muted small">Update your pricing, property classification, imagery, and guest overview.</p>
+            </div>
+
+            <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
+                <div class="wl-field">
+                    <label for="title" class="wl-label">Property Title</label>
+                    <input 
+                        id="title"
+                        name="listing[title]" 
+                        value="<%= listing.title %>" 
+                        type="text" 
+                        class="wl-input" 
+                        required
+                    >
+                    <div class="valid-feedback">Looks good!</div>
+                    <div class="invalid-feedback">Please enter a valid title.</div>
+                </div>
+
+                <div class="wl-field">
+                    <label for="description" class="wl-label">Description</label>
+                    <textarea 
+                        id="description"
+                        name="listing[description]" 
+                        class="wl-textarea" 
+                        rows="4"
+                        required
+                    ><%= listing.description %></textarea>
+                    <div class="invalid-feedback">Please enter a short description.</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        <div class="wl-field">
+                            <label for="category" class="wl-label">Category</label>
+                            <select id="category" name="listing[category]" class="wl-select">
+                                <option value="trending" <%= listing.category === 'trending' ? 'selected' : '' %>>Trending</option>
+                                <option value="rooms" <%= listing.category === 'rooms' ? 'selected' : '' %>>Rooms</option>
+                                <option value="iconic-cities" <%= listing.category === 'iconic-cities' ? 'selected' : '' %>>Iconic Cities</option>
+                                <option value="mountains" <%= listing.category === 'mountains' ? 'selected' : '' %>>Mountains</option>
+                                <option value="castles" <%= listing.category === 'castles' ? 'selected' : '' %>>Castles</option>
+                                <option value="pools" <%= listing.category === 'pools' ? 'selected' : '' %>>Amazing Pools</option>
+                                <option value="camping" <%= listing.category === 'camping' ? 'selected' : '' %>>Camping</option>
+                                <option value="farms" <%= listing.category === 'farms' ? 'selected' : '' %>>Farms</option>
+                                <option value="arctic" <%= listing.category === 'arctic' ? 'selected' : '' %>>Arctic</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="wl-field">
+                            <label for="propertyType" class="wl-label">Property Type</label>
+                            <select id="propertyType" name="listing[propertyType]" class="wl-select">
+                                <option value="House" <%= listing.propertyType === 'House' ? 'selected' : '' %>>House</option>
+                                <option value="Apartment" <%= listing.propertyType === 'Apartment' ? 'selected' : '' %>>Apartment</option>
+                                <option value="Villa" <%= listing.propertyType === 'Villa' ? 'selected' : '' %>>Villa</option>
+                                <option value="Cabin" <%= listing.propertyType === 'Cabin' ? 'selected' : '' %>>Cabin</option>
+                                <option value="Hotel" <%= listing.propertyType === 'Hotel' ? 'selected' : '' %>>Hotel</option>
+                                <option value="Cottage" <%= listing.propertyType === 'Cottage' ? 'selected' : '' %>>Cottage</option>
+                                <option value="Other" <%= listing.propertyType === 'Other' ? 'selected' : '' %>>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <% if (originalImageUrl) { %>
+                <div class="wl-field">
+                    <label class="wl-label">Current Photo</label>
+                    <div class="p-2 rounded-3 d-inline-block" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border);">
+                        <img src="<%= originalImageUrl %>" alt="<%= listing.title %>" class="rounded-3" style="max-height: 180px; object-fit: cover;">
+                    </div>
+                </div>
+                <% } %>
+
+                <div class="wl-field">
+                    <label for="image" class="wl-label">Replace Photo (Optional)</label>
+                    <input id="image" name="listing[image]" type="file" class="wl-input" accept="image/*">
+                    <span class="wl-help">Leave empty to preserve the existing photo.</span>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-4">
+                        <div class="wl-field">
+                            <label for="price" class="wl-label">Price per night (&#8377;)</label>
+                            <input 
+                                id="price"
+                                name="listing[price]" 
+                                value="<%= listing.price %>" 
+                                type="number" 
+                                min="0"
+                                class="wl-input"
+                                required
+                            >
+                            <div class="invalid-feedback">Please enter a valid price.</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-8">
+                        <div class="wl-field">
+                            <label for="country" class="wl-label">Country</label>
+                            <input 
+                                id="country"
+                                name="listing[country]" 
+                                value="<%= listing.country %>" 
+                                type="text" 
+                                class="wl-input"
+                                required
+                            >
+                            <div class="invalid-feedback">Country name should be valid.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wl-field">
+                    <label for="location" class="wl-label">Location (City / Area)</label>
+                    <input 
+                        id="location"
+                        name="listing[location]" 
+                        value="<%= listing.location %>" 
+                        type="text" 
+                        class="wl-input"
+                        required
+                    >
+                    <div class="invalid-feedback">Location should be valid.</div>
+                </div>
+
+                <div class="d-flex gap-3 mt-4">
+                    <button class="wl-btn wl-btn--primary wl-btn--lg flex-grow-1">Save Changes</button>
+                    <a href="/listings/<%= listing._id %>" class="wl-btn wl-btn--secondary wl-btn--lg">Cancel</a>
+                </div>
+            </form>
+        </div> 
+    </div>
+</div>

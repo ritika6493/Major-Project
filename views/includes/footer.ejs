@@ -1,0 +1,41 @@
+<footer class="border-top py-4 mt-5 bg-white">
+    <div class="container text-center">
+        <div class="d-flex justify-content-center gap-3 fs-5 mb-2">
+            <a href="#" class="text-secondary" aria-label="Facebook"><i class="fa-brands fa-square-facebook"></i></a>
+            <a href="#" class="text-secondary" aria-label="Instagram"><i class="fa-brands fa-square-instagram"></i></a>
+            <a href="#" class="text-secondary" aria-label="LinkedIn"><i class="fa-brands fa-square-linkedin"></i></a>
+        </div>
+        <div class="wl-muted small mb-1">&copy; <%= new Date().getFullYear() %> Wanderlust Enterprises &bull; All rights reserved</div>
+        <div class="small">
+            <a href="/privacy" class="text-secondary text-decoration-none me-3">Privacy</a>
+            <a href="/terms" class="text-secondary text-decoration-none">Terms</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Wanderlust UI Mobile Bottom Navigation -->
+<nav class="wl-bottom-nav" aria-label="Mobile Bottom Navigation">
+    <a href="/listings" aria-current="page">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span>Explore</span>
+    </a>
+    <a href="/wishlist">
+        <i class="fa-regular fa-heart"></i>
+        <span>Wishlists</span>
+    </a>
+    <a href="/trips">
+        <i class="fa-solid fa-suitcase"></i>
+        <span>Trips</span>
+    </a>
+    <% if (typeof currUser !== 'undefined' && currUser) { %>
+    <a href="/profile">
+        <i class="fa-regular fa-circle-user"></i>
+        <span>Profile</span>
+    </a>
+    <% } else { %>
+    <a href="/login">
+        <i class="fa-regular fa-circle-user"></i>
+        <span>Log in</span>
+    </a>
+    <% } %>
+</nav>

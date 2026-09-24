@@ -1,0 +1,238 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="my-4">
+    <!-- Admin Header -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="wl-badge wl-badge--verified text-uppercase">Admin Portal</span>
+                <h1 class="wl-display wl-h2 mb-0">Platform Governance & Control</h1>
+            </div>
+            <p class="wl-muted small mb-0">System-wide monitoring, user permissions, listing moderation, and audit compliance</p>
+        </div>
+        <a href="/listings" class="wl-btn wl-btn--secondary wl-btn--sm">Return to Marketplace</a>
+    </div>
+
+    <!-- System KPI Overview -->
+    <div class="wl-stats mb-5">
+        <div class="wl-stat shadow-sm">
+            <span class="wl-stat__label">Gross Merchandise Value</span>
+            <div class="wl-stat__value mt-2">&#8377; <%= Number(totalGMV).toLocaleString("en-IN") %></div>
+            <span class="text-success small"><i class="fa-solid fa-chart-line me-1"></i>Platform booking volume</span>
+        </div>
+        <div class="wl-stat shadow-sm">
+            <span class="wl-stat__label">Total Bookings</span>
+            <div class="wl-stat__value mt-2"><%= totalBookings %></div>
+            <span class="wl-muted small">All confirmed trips</span>
+        </div>
+        <div class="wl-stat shadow-sm">
+            <span class="wl-stat__label">Registered Accounts</span>
+            <div class="wl-stat__value mt-2"><%= totalUsers %></div>
+            <span class="wl-muted small">Guests, hosts & admins</span>
+        </div>
+        <div class="wl-stat shadow-sm">
+            <span class="wl-stat__label">Published Stays</span>
+            <div class="wl-stat__value mt-2"><%= totalListings %></div>
+            <span class="wl-muted small">Active listings in database</span>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="wl-btn wl-btn--secondary wl-btn--sm active" id="users-tab" data-bs-toggle="pill" data-bs-target="#users" type="button" role="tab">
+                <i class="fa-solid fa-users me-1"></i>Users Management
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="wl-btn wl-btn--secondary wl-btn--sm" id="listings-tab" data-bs-toggle="pill" data-bs-target="#listings" type="button" role="tab">
+                <i class="fa-solid fa-house-chimney me-1"></i>Listing Moderation
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="wl-btn wl-btn--secondary wl-btn--sm" id="bookings-tab" data-bs-toggle="pill" data-bs-target="#bookings" type="button" role="tab">
+                <i class="fa-solid fa-suitcase-rolling me-1"></i>Recent Bookings
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="wl-btn wl-btn--secondary wl-btn--sm" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit" type="button" role="tab">
+                <i class="fa-solid fa-shield-halved me-1"></i>Audit Logs
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="adminTabsContent">
+        <!-- 1. Users Management -->
+        <div class="tab-pane fade show active" id="users" role="tabpanel">
+            <div class="p-4 rounded-4 shadow-sm" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                <h3 class="wl-h3 mb-3">User Directory & Role Permissions</h3>
+                <div class="wl-table-wrap">
+                    <table class="table table-hover align-middle mb-0 wl-table--cards">
+                        <thead>
+                            <tr class="small wl-muted text-uppercase">
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Joined</th>
+                                <th>Current Role</th>
+                                <th>Modify Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% for (let u of recentUsers) { %>
+                            <tr>
+                                <td data-label="User">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-circle-user fs-4 text-secondary"></i>
+                                        <b class="small"><%= u.username %></b>
+                                    </div>
+                                </td>
+                                <td data-label="Email" class="small wl-muted"><%= u.email %></td>
+                                <td data-label="Joined" class="small wl-muted"><%= new Date(u.createdAt).toLocaleDateString("en-IN") %></td>
+                                <td data-label="Role">
+                                    <span class="wl-badge <%= u.role === 'admin' ? 'wl-badge--favourite text-danger' : (u.role === 'host' ? 'wl-badge--verified' : '') %> text-capitalize">
+                                        <%= u.role || 'guest' %>
+                                    </span>
+                                </td>
+                                <td data-label="Action">
+                                    <form method="POST" action="/admin/users/<%= u._id %>/role" class="d-flex align-items-center gap-2">
+                                        <select name="role" class="wl-select p-1" style="min-height: 2rem; width: 110px; font-size: 0.85rem;">
+                                            <option value="guest" <%= u.role === 'guest' ? 'selected' : '' %>>Guest</option>
+                                            <option value="host" <%= u.role === 'host' ? 'selected' : '' %>>Host</option>
+                                            <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                                        </select>
+                                        <button type="submit" class="wl-btn wl-btn--secondary wl-btn--sm" style="min-height: 2rem;">Save</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Listing Moderation -->
+        <div class="tab-pane fade" id="listings" role="tabpanel">
+            <div class="p-4 rounded-4 shadow-sm" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                <h3 class="wl-h3 mb-3">Content Moderation & Listing Oversight</h3>
+                <div class="wl-table-wrap">
+                    <table class="table table-hover align-middle mb-0 wl-table--cards">
+                        <thead>
+                            <tr class="small wl-muted text-uppercase">
+                                <th>Stay</th>
+                                <th>Owner</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% for (let l of recentListings) { %>
+                            <tr>
+                                <td data-label="Stay">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img 
+                                            src="<%= l.image ? l.image.url : 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?auto=format&fit=crop&w=800&q=60' %>" 
+                                            class="rounded-3" 
+                                            style="width: 50px; height: 40px; object-fit: cover;"
+                                            alt=""
+                                        />
+                                        <div>
+                                            <b class="small d-block text-truncate" style="max-width: 250px;"><%= l.title %></b>
+                                            <span class="wl-muted" style="font-size: 0.75rem;"><%= l.location %>, <%= l.country %></span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td data-label="Owner" class="small"><%= l.owner ? l.owner.username.split('@')[0] : 'Unknown' %></td>
+                                <td data-label="Category">
+                                    <span class="wl-badge text-capitalize"><%= l.category || 'Trending' %></span>
+                                </td>
+                                <td data-label="Price" class="small fw-bold">&#8377; <%= Number(l.price).toLocaleString("en-IN") %></td>
+                                <td data-label="Actions">
+                                    <div class="d-flex gap-2">
+                                        <a href="/listings/<%= l._id %>" class="wl-btn wl-btn--secondary wl-btn--sm" target="_blank" style="min-height: 2rem;">View</a>
+                                        <form method="POST" action="/admin/listings/<%= l._id %>/delete" onsubmit="return confirm('Are you sure you want to remove this listing?');">
+                                            <button class="wl-btn wl-btn--danger wl-btn--sm" style="min-height: 2rem;">Remove</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Recent Bookings -->
+        <div class="tab-pane fade" id="bookings" role="tabpanel">
+            <div class="p-4 rounded-4 shadow-sm" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                <h3 class="wl-h3 mb-3">Live Platform Reservations</h3>
+                <div class="wl-table-wrap">
+                    <table class="table table-hover align-middle mb-0 wl-table--cards">
+                        <thead>
+                            <tr class="small wl-muted text-uppercase">
+                                <th>Ref Code</th>
+                                <th>Property</th>
+                                <th>Guest</th>
+                                <th>Dates</th>
+                                <th>Total (INR)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% for (let b of recentBookings) { %>
+                            <tr>
+                                <td data-label="Ref Code" class="small fw-semibold">#<%= b.code %></td>
+                                <td data-label="Property" class="small text-truncate" style="max-width: 200px;"><%= b.listing ? b.listing.title : 'Stay' %></td>
+                                <td data-label="Guest" class="small"><%= b.guest ? b.guest.username.split('@')[0] : 'Guest' %></td>
+                                <td data-label="Dates" class="small"><%= new Date(b.checkIn).toLocaleDateString("en-IN") %> &ndash; <%= new Date(b.checkOut).toLocaleDateString("en-IN") %></td>
+                                <td data-label="Total" class="small fw-bold">&#8377; <%= Number(b.pricing ? b.pricing.total : 0).toLocaleString("en-IN") %></td>
+                                <td data-label="Status">
+                                    <span class="wl-badge <%= b.status === 'confirmed' ? 'wl-badge--verified' : '' %> text-capitalize">
+                                        <%= b.status %>
+                                    </span>
+                                </td>
+                            </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Audit Log -->
+        <div class="tab-pane fade" id="audit" role="tabpanel">
+            <div class="p-4 rounded-4 shadow-sm" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                <h3 class="wl-h3 mb-3">Security & Compliance Audit Trails</h3>
+                <div class="wl-table-wrap">
+                    <table class="table table-hover align-middle mb-0 wl-table--cards">
+                        <thead>
+                            <tr class="small wl-muted text-uppercase">
+                                <th>Timestamp</th>
+                                <th>Actor</th>
+                                <th>Action</th>
+                                <th>Entity</th>
+                                <th>Details</th>
+                                <th>IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% for (let log of auditLogs) { %>
+                            <tr>
+                                <td data-label="Time" class="small wl-muted"><%= new Date(log.createdAt).toLocaleString("en-IN") %></td>
+                                <td data-label="Actor" class="small fw-bold"><%= log.actorUsername %></td>
+                                <td data-label="Action" class="small"><code class="text-danger"><%= log.action %></code></td>
+                                <td data-label="Entity" class="small"><span class="wl-badge"><%= log.entityType %></span></td>
+                                <td data-label="Details" class="small wl-muted"><%= log.details %></td>
+                                <td data-label="IP" class="small font-monospace wl-muted"><%= log.ip %></td>
+                            </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

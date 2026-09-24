@@ -1,0 +1,73 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="my-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="wl-display wl-h2 mb-1">My Reservations</h1>
+            <p class="wl-muted small mb-0">Track upcoming bookings, confirmation codes, and trip history</p>
+        </div>
+        <a href="/listings" class="wl-btn wl-btn--secondary wl-btn--sm">Explore More Stays</a>
+    </div>
+
+    <% if (bookings && bookings.length > 0) { %>
+    <div class="row row-cols-1 row-cols-lg-2 g-4 mb-5">
+        <% for (let booking of bookings) { %>
+        <div class="col">
+            <div class="p-3 rounded-4 h-100 shadow-sm" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                <div class="row g-3 h-100">
+                    <div class="col-sm-5">
+                        <img 
+                            src="<%= booking.listing && booking.listing.image ? booking.listing.image.url : 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?auto=format&fit=crop&w=800&q=60' %>" 
+                            class="rounded-3 w-100 h-100" 
+                            alt="<%= booking.listing ? booking.listing.title : 'Listing' %>" 
+                            style="object-fit: cover; min-height: 180px;"
+                        />
+                    </div>
+                    <div class="col-sm-7 d-flex flex-column">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="wl-badge <%= booking.status === 'confirmed' ? 'wl-badge--verified' : '' %> text-capitalize">
+                                <i class="fa-solid fa-circle-check me-1"></i><%= booking.status %>
+                            </span>
+                            <small class="wl-muted fw-bold">#<%= booking.code %></small>
+                        </div>
+
+                        <h3 class="wl-h3 mb-1 text-truncate">
+                            <%= booking.listing ? booking.listing.title : 'Stay Details' %>
+                        </h3>
+                        <p class="wl-muted small mb-2">
+                            <i class="fa-solid fa-location-dot me-1 text-danger"></i>
+                            <%= booking.listing ? booking.listing.location : '' %>, <%= booking.listing ? booking.listing.country : '' %>
+                        </p>
+
+                        <div class="p-2 rounded-3 small mb-3" style="background: var(--wl-surface-2);">
+                            <div><b>Check-in:</b> <%= new Date(booking.checkIn).toLocaleDateString("en-IN", { month: 'short', day: 'numeric', year: 'numeric' }) %></div>
+                            <div><b>Checkout:</b> <%= new Date(booking.checkOut).toLocaleDateString("en-IN", { month: 'short', day: 'numeric', year: 'numeric' }) %></div>
+                            <div class="mt-1 text-dark fw-bold"><b>Paid:</b> &#8377; <%= Number(booking.pricing.total).toLocaleString("en-IN") %></div>
+                        </div>
+
+                        <div class="mt-auto d-flex gap-2">
+                            <% if (booking.listing) { %>
+                            <a href="/listings/<%= booking.listing._id %>" class="wl-btn wl-btn--secondary wl-btn--sm flex-grow-1">View Stay</a>
+                            <% } %>
+
+                            <% if (booking.status === 'confirmed') { %>
+                            <form method="POST" action="/bookings/<%= booking._id %>/cancel" onsubmit="return confirm('Are you sure you want to cancel this reservation?');">
+                                <button class="wl-btn wl-btn--danger wl-btn--sm">Cancel</button>
+                            </form>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
+    </div>
+    <% } else { %>
+    <div class="text-center py-5 my-5 rounded-4" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border);">
+        <i class="fa-solid fa-suitcase-rolling fs-1 text-secondary mb-3 d-block"></i>
+        <h3 class="wl-h2 fw-bold">No trips booked yet</h3>
+        <p class="wl-muted mb-4">Time to pack your bags and start planning your next getaway!</p>
+        <a href="/listings" class="wl-btn wl-btn--primary">Start Exploring</a>
+    </div>
+    <% } %>
+</div>

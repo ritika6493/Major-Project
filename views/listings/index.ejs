@@ -1,0 +1,141 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="d-flex align-items-center justify-content-between gap-3 my-3">
+    <nav class="wl-catbar flex-grow-1" aria-label="Stay categories">
+        <a href="/listings<%= searchQuery ? '?q=' + encodeURIComponent(searchQuery) : '' %>" class="wl-cat" <%= !activeCategory ? 'aria-current="true"' : '' %>>
+            <i class="fa-solid fa-border-all"></i>
+            <span>All Stays</span>
+        </a>
+        <a href="/listings?category=trending<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" class="wl-cat" <%= activeCategory === 'trending' ? 'aria-current="true"' : '' %>>
+            <i class="fa-solid fa-fire"></i>
+            <span>Trending</span>
+        </a>
+        <a href="/listings?category=rooms<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" class="wl-cat" <%= activeCategory === 'rooms' ? 'aria-current="true"' : '' %>>
+            <i class="fa-solid fa-bed"></i>
+            <span>Rooms</span>
+        </a>
+        <a href="/listings?category=iconic-cities<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" class="wl-cat" <%= activeCategory === 'iconic-cities' ? 'aria-current="true"' : '' %>>
+            <i class="fa-solid fa-mountain-city"></i>
+            <span>Iconic Cities</span>
+        </a>
+        <a href="/listings?category=mountains<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" class="wl-cat" <%= activeCategory === 'mountains' ? 'aria-current="true"' : '' %>>
+            <i class="fa-solid fa-mountain"></i>
+            <span>Mountains</span>
+        </a>
+        <a href="/listings?category=castles<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" class="wl-cat" <%= activeCategory === 'castles' ? 'aria-current="true"' : '' %>>
+            <i class="fa-brands fa-fort-awesome"></i>
+            <span>Castles</span>
+        </a>
+        <a href="/listings?category=pools<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" class="wl-cat" <%= activeCategory === 'pools' ? 'aria-current="true"' : '' %>>
+            <i class="fa-solid fa-person-swimming"></i>
+            <span>Amazing Pools</span>
+        </a>
+        <a href="/listings?category=camping<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" class="wl-cat" <%= activeCategory === 'camping' ? 'aria-current="true"' : '' %>>
+            <i class="fa-solid fa-campground"></i>
+            <span>Camping</span>
+        </a>
+        <a href="/listings?category=farms<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" class="wl-cat" <%= activeCategory === 'farms' ? 'aria-current="true"' : '' %>>
+            <i class="fa-solid fa-cow"></i>
+            <span>Farms</span>
+        </a>
+        <a href="/listings?category=arctic<%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" class="wl-cat" <%= activeCategory === 'arctic' ? 'aria-current="true"' : '' %>>
+            <i class="fa-solid fa-snowflake"></i>
+            <span>Arctic</span>
+        </a>
+    </nav>
+
+    <div class="d-none d-lg-flex align-items-center gap-2 p-2 px-3 border rounded-pill bg-white shadow-sm flex-shrink-0">
+        <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+            <label class="form-check-label small fw-semibold text-nowrap ms-1" for="switchCheckDefault">Display total after taxes</label>
+        </div>
+    </div>
+</div>
+
+<% if (searchQuery || activeCategory) { %>
+<div class="d-flex align-items-center justify-content-between p-3 rounded-4 mb-4" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border);">
+    <div>
+        <% if (searchQuery) { %>
+            <span>Searching for: <b>"<%= searchQuery %>"</b></span>
+        <% } %>
+        <% if (searchQuery && activeCategory) { %> &bull; <% } %>
+        <% if (activeCategory) { %>
+            <span class="text-capitalize">Category: <b><%= activeCategory %></b></span>
+        <% } %>
+        <span class="wl-muted ms-2">(<%= total %> <%= total === 1 ? 'stay' : 'stays' %> found)</span>
+    </div>
+    <a href="/listings" class="wl-btn wl-btn--secondary wl-btn--sm">Clear filters</a>
+</div>
+<% } %>
+
+<% if (allListings && allListings.length > 0) { %>
+<div class="wl-grid mb-5">
+    <% for (let listing of allListings) { %>
+    <article class="position-relative">
+        <a href="/listings/<%= listing._id %>" class="wl-card">
+            <div class="wl-card__media">
+                <img 
+                    src="<%= listing.image ? listing.image.url : 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?auto=format&fit=crop&w=800&q=60' %>" 
+                    alt="<%= listing.title %>"
+                    class="wl-card__img"
+                    loading="lazy"
+                />
+                <% if (listing.avgRating >= 4.8) { %>
+                    <span class="wl-badge wl-badge--favourite wl-card__badge">
+                        <i class="fa-solid fa-award text-danger me-1"></i>Guest favourite
+                    </span>
+                <% } %>
+            </div>
+
+            <div class="wl-card__body">
+                <div class="wl-card__row">
+                    <h3 class="wl-card__title"><%= listing.title %></h3>
+                    <span class="wl-rating">
+                        <i class="fa-solid fa-star wl-rating__star"></i>
+                        <span><%= listing.avgRating > 0 ? listing.avgRating.toFixed(1) : 'New' %></span>
+                    </span>
+                </div>
+                <div class="wl-card__meta"><%= listing.location %>, <%= listing.country %></div>
+                <div class="wl-card__meta"><%= listing.propertyType || 'Entire stay' %> &bull; <%= listing.capacity ? listing.capacity.beds : 1 %> beds</div>
+                <div class="wl-price mt-1">
+                    &#8377; <%= listing.price ? Number(listing.price).toLocaleString("en-IN") : "0" %>
+                    <small class="tax-info text-muted small" style="display: none;"> (+ 18% GST)</small>
+                    <small> / night</small>
+                </div>
+            </div>
+        </a>
+
+        <% if (currUser) { %>
+        <form method="POST" action="/listings/<%= listing._id %>/wishlist" class="position-absolute" style="top: 0.5rem; right: 0.5rem; z-index: 5;">
+            <button type="submit" class="wl-heart" aria-label="Save to Wishlist" title="Save to Wishlist">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </button>
+        </form>
+        <% } %>
+    </article>
+    <% } %>
+</div>
+<% } else { %>
+<div class="text-center py-5 my-5">
+    <i class="fa-regular fa-compass fs-1 wl-muted mb-3 d-block"></i>
+    <h3 class="wl-h2 fw-bold">No stays found</h3>
+    <p class="wl-muted mb-4">Try searching for another location or clear active category filters.</p>
+    <a href="/listings" class="wl-btn wl-btn--primary">Browse All Stays</a>
+</div>
+<% } %>
+
+<script>
+    const taxSwitch = document.getElementById("switchCheckDefault");
+    if (taxSwitch) {
+        taxSwitch.addEventListener("click", () => {
+            const taxInfoElements = document.getElementsByClassName("tax-info");
+            for (let info of taxInfoElements) {
+                if (info.style.display !== "inline") {
+                    info.style.display = "inline";
+                } else {
+                    info.style.display = "none";
+                }
+            }
+        });
+    }
+</script>

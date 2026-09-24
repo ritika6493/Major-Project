@@ -1,0 +1,386 @@
+<% layout("/layouts/boilerplate") %>
+<script>
+    const mapToken = "<%= process.env.MAP_TOKEN %>";
+    const listing = <%- JSON.stringify({ title: listing.title, geometry: listing.geometry }).replace(/</g, "\\u003c") %>;
+    const nightlyPrice = <%= listing.price || 0 %>;
+</script>
+
+<div class="mt-2 mb-5">
+    <!-- Header: Title, Wishlist & Badges -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+        <div>
+            <h1 class="wl-display wl-h2 mb-1"><%= listing.title %></h1>
+            <div class="d-flex align-items-center flex-wrap gap-2 wl-muted small">
+                <span class="wl-rating">
+                    <i class="fa-solid fa-star wl-rating__star"></i>
+                    <b class="text-dark"><%= listing.avgRating > 0 ? listing.avgRating.toFixed(1) : 'New' %></b>
+                    <span>(<%= listing.reviews ? listing.reviews.length : 0 %> reviews)</span>
+                </span>
+                &bull;
+                <span class="wl-badge wl-badge--verified">
+                    <i class="fa-solid fa-circle-check me-1"></i>Verified Stay
+                </span>
+                &bull;
+                <span><i class="fa-solid fa-location-dot text-danger me-1"></i><%= listing.location %>, <%= listing.country %></span>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <% if (currUser) { %>
+            <form method="POST" action="/listings/<%= listing._id %>/wishlist">
+                <button type="submit" class="wl-btn wl-btn--secondary wl-btn--sm">
+                    <i class="fa-regular fa-heart text-danger me-1"></i>Save
+                </button>
+            </form>
+            <% } %>
+            <button class="wl-btn wl-btn--secondary wl-btn--sm" onclick="navigator.clipboard.writeText(window.location.href); alert('Link copied to clipboard!');">
+                <i class="fa-solid fa-arrow-up-from-bracket me-1"></i>Share
+            </button>
+        </div>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div class="wl-gallery mb-4">
+        <img 
+            src="<%= listing.image ? listing.image.url : 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?auto=format&fit=crop&w=1200&q=80' %>" 
+            alt="<%= listing.title %> - Main View"
+            class="shadow-sm"
+        />
+        <img 
+            src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80" 
+            alt="Living Space"
+            class="d-none d-md-block"
+        />
+        <img 
+            src="https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80" 
+            alt="Bedroom Suite"
+            class="d-none d-md-block"
+        />
+        <img 
+            src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80" 
+            alt="Bathroom Interior"
+            class="d-none d-md-block"
+        />
+    </div>
+
+    <!-- Main Content & Sticky Booking Engine -->
+    <div class="wl-detail">
+        <!-- Left Column: Space Details, Amenities, Reviews, Map -->
+        <div>
+            <!-- Host & Capacity Header -->
+            <div class="d-flex align-items-center justify-content-between pb-4 mb-4" style="border-bottom: 1px solid var(--wl-border);">
+                <div>
+                    <h2 class="wl-h3 mb-1">
+                        <%= listing.propertyType || 'Entire stay' %> hosted by <%= listing.owner ? listing.owner.username.split('@')[0] : 'Wanderlust Host' %>
+                    </h2>
+                    <p class="wl-muted small mb-0">
+                        <%= listing.capacity ? listing.capacity.guests : 2 %> guests &bull; 
+                        <%= listing.capacity ? listing.capacity.bedrooms : 1 %> bedroom &bull; 
+                        <%= listing.capacity ? listing.capacity.beds : 1 %> bed &bull; 
+                        <%= listing.capacity ? listing.capacity.bathrooms : 1 %> bath
+                    </p>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center bg-light border" style="width: 52px; height: 52px;">
+                    <i class="fa-solid fa-circle-user fs-2 text-secondary"></i>
+                </div>
+            </div>
+
+            <!-- Host Highlights / Badges -->
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <span class="wl-chip"><i class="fa-solid fa-medal text-warning"></i> Experienced Host</span>
+                <span class="wl-chip"><i class="fa-solid fa-key text-primary"></i> Self Check-in</span>
+                <span class="wl-chip"><i class="fa-solid fa-wifi text-success"></i> High-Speed Wifi</span>
+                <span class="wl-chip"><i class="fa-solid fa-ban text-secondary"></i> Free Cancellation</span>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+                <h3 class="wl-h3 mb-2">About this space</h3>
+                <p class="wl-muted" style="line-height: 1.8; font-size: 1.05rem;"><%= listing.description %></p>
+            </div>
+
+            <!-- Amenities -->
+            <% if (listing.amenities && listing.amenities.length > 0) { %>
+            <div class="py-4 my-2" style="border-top: 1px solid var(--wl-border); border-bottom: 1px solid var(--wl-border);">
+                <h3 class="wl-h3 mb-3">What this place offers</h3>
+                <div class="row row-cols-1 row-cols-sm-2 g-3">
+                    <% for (let amenity of listing.amenities) { %>
+                    <div class="col">
+                        <div class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="fa-solid fa-circle-check text-success"></i>
+                            <span><%= amenity %></span>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+            <% } %>
+
+            <!-- Host Administration Settings -->
+            <% if (currUser && listing.owner && listing.owner._id.equals(currUser._id)) { %>
+            <div class="p-4 rounded-4 my-4" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border);">
+                <h4 class="wl-h3 mb-2">Host Administration</h4>
+                <p class="wl-muted small mb-3">You own this stay. Update listing pricing, details, or manage calendar availability.</p>
+                <div class="d-flex gap-2">
+                    <a href="/listings/<%= listing._id %>/edit" class="wl-btn wl-btn--secondary wl-btn--sm">
+                        <i class="fa-solid fa-pen-to-square me-1"></i>Edit Listing
+                    </a>
+                    <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" onsubmit="return confirm('Are you sure you want to delete this listing?');">
+                        <button class="wl-btn wl-btn--danger wl-btn--sm">
+                            <i class="fa-solid fa-trash me-1"></i>Delete Listing
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <% } %>
+
+            <!-- Reviews Section -->
+            <div class="py-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h3 class="wl-h3 mb-0">
+                        <i class="fa-solid fa-star wl-rating__star me-1"></i>
+                        Guest Reviews (<%= listing.reviews ? listing.reviews.length : 0 %>)
+                    </h3>
+                </div>
+
+                <% if (currUser) { %>
+                <div class="p-4 rounded-4 mb-4" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border);">
+                    <h4 class="wl-h3 mb-2">Leave a Verified Review</h4>
+                    <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate class="needs-validation">
+                        <div class="mb-3">
+                            <label class="wl-label">Overall Rating</label>
+                            <fieldset class="starability-slot mt-1">
+                                <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="5" checked aria-label="No rating." />
+                                <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                                <label for="first-rate1" title="Terrible">1 star</label>
+                                <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                                <label for="first-rate2" title="Not good">2 stars</label>
+                                <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                                <label for="first-rate3" title="Average">3 stars</label>
+                                <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                                <label for="first-rate4" title="Very good">4 stars</label>
+                                <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                                <label for="first-rate5" title="Amazing">5 stars</label>
+                            </fieldset>
+                        </div>
+                        <div class="wl-field">
+                            <label for="comment" class="wl-label">Your Experience</label>
+                            <textarea 
+                               name="review[comment]" 
+                               id="comment" 
+                               class="wl-textarea"
+                               placeholder="How was the stay? Mention cleanliness, check-in, and location..."
+                               required></textarea>
+                            <div class="invalid-feedback">Please share a few words about your experience.</div>
+                        </div>
+                        <button class="wl-btn wl-btn--primary wl-btn--sm">Submit Review</button>       
+                    </form>
+                </div>
+                <% } %>
+
+                <% if (listing.reviews && listing.reviews.length > 0) { %>
+                <div class="row row-cols-1 row-cols-md-2 g-3">
+                    <% for (let review of listing.reviews) { %>
+                    <div class="col">
+                        <div class="p-3 rounded-4 h-100 d-flex flex-column" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-circle-user fs-4 text-secondary"></i>
+                                    <div>
+                                        <b class="d-block small"><%= review.author ? review.author.username.split('@')[0] : 'Guest' %></b>
+                                        <span class="wl-muted" style="font-size: 0.75rem;">Verified Guest</span>
+                                    </div>
+                                </div>
+                                <span class="starability-result" data-rating="<%= review.rating %>" style="transform: scale(0.7); transform-origin: right center;"></span>
+                            </div>
+                            <p class="wl-muted small mb-3 flex-grow-1"><%= review.comment %></p>
+                            <% if (currUser && review.author && review.author._id.equals(currUser._id)) { %>
+                            <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" class="mt-auto">
+                                <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none small">Delete review</button>
+                            </form>
+                            <% } %>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+                <% } else { %>
+                <p class="wl-muted small">No reviews yet. Be the first to share your experience!</p>
+                <% } %>
+            </div>
+
+            <!-- Location & Map -->
+            <div class="py-4" style="border-top: 1px solid var(--wl-border);">
+                <h3 class="wl-h3 mb-2">Where you'll be</h3>
+                <p class="wl-muted small mb-3"><%= listing.location %>, <%= listing.country %></p>
+                <div id="map" class="rounded-4 overflow-hidden shadow-sm" style="width: 100%; height: clamp(260px, 45vh, 480px); border: 1px solid var(--wl-border);"></div>
+            </div>
+        </div>
+
+        <!-- Right Column: Sticky Booking Widget -->
+        <div>
+            <div class="wl-booking" id="bookingBox">
+                <div class="d-flex justify-content-between align-items-baseline mb-3">
+                    <div>
+                        <span class="wl-h2 fw-bold">&#8377; <%= Number(listing.price).toLocaleString("en-IN") %></span>
+                        <span class="wl-muted"> / night</span>
+                    </div>
+                    <span class="wl-badge wl-badge--verified"><i class="fa-solid fa-shield-halved me-1"></i>Best Price</span>
+                </div>
+
+                <% if (currUser && listing.owner && listing.owner._id.equals(currUser._id)) { %>
+                <div class="alert alert-info small mb-0 rounded-3">
+                    <i class="fa-solid fa-circle-info me-1"></i> You own this stay.
+                </div>
+                <% } else { %>
+                <form method="GET" action="/listings/<%= listing._id %>/checkout" id="bookingForm" novalidate class="needs-validation">
+                    <div class="p-3 rounded-3 mb-3" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border-strong);">
+                        <div class="row g-2">
+                            <div class="col-6 border-end">
+                                <label for="checkIn" class="wl-label text-uppercase mb-1" style="font-size: 0.65rem;">Check-in</label>
+                                <input 
+                                    type="date" 
+                                    id="checkIn" 
+                                    name="checkIn" 
+                                    class="form-control border-0 p-0 bg-transparent fw-semibold" 
+                                    style="outline: none; box-shadow: none;"
+                                    required
+                                />
+                            </div>
+                            <div class="col-6 ps-2">
+                                <label for="checkOut" class="wl-label text-uppercase mb-1" style="font-size: 0.65rem;">Checkout</label>
+                                <input 
+                                    type="date" 
+                                    id="checkOut" 
+                                    name="checkOut" 
+                                    class="form-control border-0 p-0 bg-transparent fw-semibold" 
+                                    style="outline: none; box-shadow: none;"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <hr class="my-2" style="border-color: var(--wl-border);">
+                        <div>
+                            <label for="guestsCount" class="wl-label text-uppercase mb-1" style="font-size: 0.65rem;">Guests</label>
+                            <select id="guestsCount" name="guestsCount" class="form-select border-0 p-0 bg-transparent fw-semibold" style="outline: none; box-shadow: none;">
+                                <option value="1" selected>1 guest</option>
+                                <option value="2">2 guests</option>
+                                <option value="3">3 guests</option>
+                                <option value="4">4 guests</option>
+                                <option value="5">5+ guests</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <% if (currUser) { %>
+                    <button type="submit" id="reserveBtn" class="wl-btn wl-btn--primary wl-btn--block wl-btn--lg mb-3">
+                        Reserve Stay
+                    </button>
+                    <% } else { %>
+                    <a href="/login" class="wl-btn wl-btn--primary wl-btn--block wl-btn--lg mb-3">
+                        Log in to Reserve
+                    </a>
+                    <% } %>
+
+                    <p class="text-center wl-muted small mb-3">You won't be charged yet</p>
+
+                    <!-- Live Breakdown Widget -->
+                    <div id="priceCalculation" style="display: none;" class="wl-breakdown">
+                        <div class="wl-breakdown__row small wl-muted">
+                            <span id="nightlyCalcLabel">&#8377; <%= listing.price %> &times; 1 night</span>
+                            <span id="nightlyCalcAmount">&#8377; <%= listing.price %></span>
+                        </div>
+                        <div class="wl-breakdown__row small wl-muted">
+                            <span>Cleaning fee</span>
+                            <span>&#8377; 500</span>
+                        </div>
+                        <div class="wl-breakdown__row small wl-muted">
+                            <span>Wanderlust service fee</span>
+                            <span>&#8377; 300</span>
+                        </div>
+                        <div class="wl-breakdown__row small wl-muted">
+                            <span>GST (18%)</span>
+                            <span id="gstAmount">&#8377; 0</span>
+                        </div>
+                        <div class="wl-breakdown__row wl-breakdown__row--total fs-6">
+                            <span>Total (INR)</span>
+                            <span id="totalCalcAmount">&#8377; <%= listing.price %></span>
+                        </div>
+                    </div>
+                </form>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Fixed Reserve Bar -->
+<div class="wl-reserve-bar">
+    <div>
+        <div class="wl-price fs-5">&#8377; <%= Number(listing.price).toLocaleString("en-IN") %> <small>/ night</small></div>
+        <div class="wl-rating small">
+            <i class="fa-solid fa-star wl-rating__star"></i>
+            <span><%= listing.avgRating > 0 ? listing.avgRating.toFixed(1) : 'New' %></span>
+        </div>
+    </div>
+    <a href="#bookingBox" class="wl-btn wl-btn--primary wl-btn--sm">
+        Reserve
+    </a>
+</div>
+
+<script src="/js/map.js"></script>
+
+<script>
+    // Live Price Breakdown Calculator
+    const checkInInput = document.getElementById("checkIn");
+    const checkOutInput = document.getElementById("checkOut");
+    const priceCalculation = document.getElementById("priceCalculation");
+    const nightlyCalcLabel = document.getElementById("nightlyCalcLabel");
+    const nightlyCalcAmount = document.getElementById("nightlyCalcAmount");
+    const gstAmount = document.getElementById("gstAmount");
+    const totalCalcAmount = document.getElementById("totalCalcAmount");
+
+    if (checkInInput && checkOutInput) {
+        const todayStr = new Date().toISOString().split("T")[0];
+        checkInInput.min = todayStr;
+
+        checkInInput.addEventListener("change", () => {
+            if (checkInInput.value) {
+                const nextDay = new Date(checkInInput.value);
+                nextDay.setDate(nextDay.getDate() + 1);
+                checkOutInput.min = nextDay.toISOString().split("T")[0];
+                if (checkOutInput.value && checkOutInput.value <= checkInInput.value) {
+                    checkOutInput.value = nextDay.toISOString().split("T")[0];
+                }
+            }
+            updatePricing();
+        });
+
+        checkOutInput.addEventListener("change", updatePricing);
+
+        function updatePricing() {
+            if (checkInInput.value && checkOutInput.value) {
+                const d1 = new Date(checkInInput.value);
+                const d2 = new Date(checkOutInput.value);
+                const diffTime = d2.getTime() - d1.getTime();
+                const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (nights > 0) {
+                    const subtotal = nights * nightlyPrice;
+                    const cleaning = 500;
+                    const service = 300;
+                    const tax = Math.round((subtotal + cleaning + service) * 0.18);
+                    const grandTotal = subtotal + cleaning + service + tax;
+
+                    nightlyCalcLabel.textContent = `₹ ${nightlyPrice.toLocaleString('en-IN')} × ${nights} ${nights === 1 ? 'night' : 'nights'}`;
+                    nightlyCalcAmount.textContent = `₹ ${subtotal.toLocaleString('en-IN')}`;
+                    gstAmount.textContent = `₹ ${tax.toLocaleString('en-IN')}`;
+                    totalCalcAmount.textContent = `₹ ${grandTotal.toLocaleString('en-IN')}`;
+
+                    priceCalculation.style.display = "grid";
+                } else {
+                    priceCalculation.style.display = "none";
+                }
+            }
+        }
+    }
+</script>

@@ -1,0 +1,154 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="my-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="/listings/<%= listing._id %>" class="wl-btn wl-btn--secondary wl-btn--sm rounded-circle p-0" style="width: 36px; height: 36px;">
+            <i class="fa-solid fa-chevron-left"></i>
+        </a>
+        <h1 class="wl-display wl-h2 mb-0">Confirm and Pay</h1>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- Left Column: Trip Details & Payment Options -->
+        <div class="col-12 col-lg-7">
+            <!-- Trip Summary Card -->
+            <div class="p-4 rounded-4 shadow-sm mb-4" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                <h3 class="wl-h3 mb-3">Your Trip</h3>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="fw-semibold d-block">Dates</span>
+                        <span class="wl-muted small">
+                            <%= new Date(checkIn).toLocaleDateString("en-IN", { month: 'short', day: 'numeric', year: 'numeric' }) %> &ndash; 
+                            <%= new Date(checkOut).toLocaleDateString("en-IN", { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                        </span>
+                    </div>
+                    <span class="wl-chip"><%= pricing.nights %> <%= pricing.nights === 1 ? 'night' : 'nights' %></span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="fw-semibold d-block">Guests</span>
+                        <span class="wl-muted small"><%= guestsCount %> <%= guestsCount === 1 ? 'guest' : 'guests' %></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="p-4 rounded-4 shadow-sm mb-4" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                <h3 class="wl-h3 mb-3">Choose Payment Method</h3>
+                <form method="POST" action="/listings/<%= listing._id %>/checkout">
+                    <input type="hidden" name="checkIn" value="<%= checkIn %>">
+                    <input type="hidden" name="checkOut" value="<%= checkOut %>">
+                    <input type="hidden" name="guestsCount" value="<%= guestsCount %>">
+
+                    <!-- Payment Method Radios -->
+                    <div class="d-flex flex-column gap-2 mb-3">
+                        <label class="p-3 rounded-3 d-flex align-items-center justify-content-between" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border-strong); cursor: pointer;">
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="radio" name="paymentMethod" value="card" checked class="form-check-input mt-0">
+                                <span class="fw-medium">Credit or Debit Card</span>
+                            </div>
+                            <div>
+                                <i class="fa-brands fa-cc-visa fs-4 text-primary"></i>
+                                <i class="fa-brands fa-cc-mastercard fs-4 text-danger ms-1"></i>
+                            </div>
+                        </label>
+
+                        <label class="p-3 rounded-3 d-flex align-items-center justify-content-between" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border-strong); cursor: pointer;">
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="radio" name="paymentMethod" value="upi" class="form-check-input mt-0">
+                                <span class="fw-medium">UPI / Instant QR</span>
+                            </div>
+                            <span class="wl-badge wl-badge--verified">Instant</span>
+                        </label>
+
+                        <label class="p-3 rounded-3 d-flex align-items-center justify-content-between" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border-strong); cursor: pointer;">
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="radio" name="paymentMethod" value="netbanking" class="form-check-input mt-0">
+                                <span class="fw-medium">Net Banking</span>
+                            </div>
+                            <i class="fa-solid fa-building-columns fs-5 text-secondary"></i>
+                        </label>
+                    </div>
+
+                    <!-- Card Details Mock Input -->
+                    <div id="cardInputs" class="p-3 rounded-3 mb-3" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border);">
+                        <div class="mb-2">
+                            <label class="wl-label small">Card Number</label>
+                            <input type="text" class="wl-input" placeholder="4111 2222 3333 4444" value="4111 2222 3333 4444">
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="wl-label small">Expiry</label>
+                                <input type="text" class="wl-input" placeholder="MM/YY" value="12/28">
+                            </div>
+                            <div class="col-6">
+                                <label class="wl-label small">CVV</label>
+                                <input type="password" class="wl-input" placeholder="123" value="123">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="my-4 py-2" style="border-top: 1px solid var(--wl-border); border-bottom: 1px solid var(--wl-border);">
+                        <h4 class="wl-h3 mb-1">Cancellation Policy</h4>
+                        <p class="wl-muted small mb-0">
+                            Free cancellation up to 48 hours before check-in. Cancel anytime after that for a 50% refund minus taxes.
+                        </p>
+                    </div>
+
+                    <button type="submit" class="wl-btn wl-btn--primary wl-btn--block wl-btn--lg">
+                        Pay &#8377; <%= Number(pricing.total).toLocaleString("en-IN") %> & Confirm Reservation
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Column: Itemized Price Summary -->
+        <div class="col-12 col-lg-5">
+            <div class="wl-booking sticky-top" style="top: 90px;">
+                <div class="d-flex gap-3 align-items-center pb-3 mb-3" style="border-bottom: 1px solid var(--wl-border);">
+                    <img 
+                        src="<%= listing.image ? listing.image.url : 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?auto=format&fit=crop&w=800&q=60' %>" 
+                        class="rounded-3" 
+                        style="width: 100px; height: 80px; object-fit: cover;"
+                        alt=""
+                    />
+                    <div>
+                        <span class="wl-badge wl-badge--verified text-capitalize mb-1"><%= listing.category || 'Trending' %></span>
+                        <h4 class="wl-h3 text-truncate mb-1" style="max-width: 220px;"><%= listing.title %></h4>
+                        <span class="wl-muted small"><i class="fa-solid fa-location-dot me-1 text-danger"></i><%= listing.location %>, <%= listing.country %></span>
+                    </div>
+                </div>
+
+                <h3 class="wl-h3 mb-3">Price Details</h3>
+                
+                <div class="wl-breakdown">
+                    <div class="wl-breakdown__row small wl-muted">
+                        <span>&#8377; <%= Number(pricing.nightlyRate).toLocaleString("en-IN") %> &times; <%= pricing.nights %> nights</span>
+                        <span>&#8377; <%= Number(pricing.totalNightsPrice).toLocaleString("en-IN") %></span>
+                    </div>
+
+                    <div class="wl-breakdown__row small wl-muted">
+                        <span>Cleaning fee</span>
+                        <span>&#8377; <%= Number(pricing.cleaningFee).toLocaleString("en-IN") %></span>
+                    </div>
+
+                    <div class="wl-breakdown__row small wl-muted">
+                        <span>Wanderlust service fee</span>
+                        <span>&#8377; <%= Number(pricing.serviceFee).toLocaleString("en-IN") %></span>
+                    </div>
+
+                    <div class="wl-breakdown__row small wl-muted">
+                        <span>Taxes (18% GST)</span>
+                        <span>&#8377; <%= Number(pricing.taxes).toLocaleString("en-IN") %></span>
+                    </div>
+
+                    <div class="wl-breakdown__row wl-breakdown__row--total fs-5 pt-3">
+                        <span>Total (INR)</span>
+                        <span class="fw-bold">&#8377; <%= Number(pricing.total).toLocaleString("en-IN") %></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

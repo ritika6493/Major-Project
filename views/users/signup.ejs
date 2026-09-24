@@ -1,0 +1,61 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row my-5 justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-5">
+        <div class="p-4 p-md-5 rounded-4 shadow-sm" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+            <div class="text-center mb-4">
+                <i class="fa-regular fa-compass fs-1 text-danger mb-2"></i>
+                <h1 class="wl-display wl-h2">Create an Account</h1>
+                <p class="wl-muted small">Join millions of travelers discovering handcrafted stays worldwide</p>
+            </div>
+
+            <form action="/signup" method="post" class="needs-validation" novalidate>
+                <div class="wl-field">
+                    <label for="username" class="wl-label">Username</label>
+                    <input 
+                      name="username"  
+                      id="username"
+                      type="text" 
+                      placeholder="e.g. wanderer_sam"
+                      class="wl-input"
+                      required/>
+                    <div class="invalid-feedback">Please choose a username.</div>
+                </div>
+
+                <div class="wl-field">
+                    <label for="email" class="wl-label">Email Address</label>
+                    <input 
+                      name="email"  
+                      id="email"
+                      type="email" 
+                      placeholder="name@example.com"
+                      class="wl-input"
+                      required/>
+                    <div class="invalid-feedback">Please provide a valid email address.</div>
+                </div>
+
+                <div class="wl-field">
+                    <label for="password" class="wl-label">Password</label>
+                    <input 
+                      name="password"  
+                      id="password"
+                      type="password" 
+                      placeholder="Create a strong password"
+                      class="wl-input"
+                      required/>
+                    <span class="wl-help">At least 8 characters recommended.</span>
+                    <div class="invalid-feedback">Password is required.</div>
+                </div>
+
+                <button class="wl-btn wl-btn--primary wl-btn--block wl-btn--lg mt-2 mb-3">
+                    Sign Up
+                </button>
+
+                <p class="text-center wl-muted small mb-0">
+                    Already have an account? 
+                    <a href="/login" class="fw-semibold text-danger text-decoration-none">Log in</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>

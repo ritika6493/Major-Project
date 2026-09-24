@@ -1,0 +1,58 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="my-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="wl-display wl-h2 mb-1">My Saved Stays</h1>
+            <p class="wl-muted small mb-0">Handpicked retreats you've saved for future journeys</p>
+        </div>
+        <a href="/listings" class="wl-btn wl-btn--secondary wl-btn--sm">Explore More</a>
+    </div>
+
+    <% if (wishlist && wishlist.length > 0) { %>
+    <div class="wl-grid mb-5">
+        <% for (let listing of wishlist) { %>
+        <article class="position-relative">
+            <a href="/listings/<%= listing._id %>" class="wl-card">
+                <div class="wl-card__media">
+                    <img 
+                      src="<%= listing.image ? listing.image.url : 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?auto=format&fit=crop&w=800&q=60' %>" 
+                      class="wl-card__img" 
+                      alt="<%= listing.title %>" 
+                      loading="lazy"
+                    />
+                </div>
+
+                <div class="wl-card__body">
+                    <div class="wl-card__row">
+                        <h3 class="wl-card__title"><%= listing.title %></h3>
+                        <span class="wl-rating">
+                            <i class="fa-solid fa-star wl-rating__star"></i>
+                            <span><%= listing.avgRating > 0 ? listing.avgRating.toFixed(1) : 'New' %></span>
+                        </span>
+                    </div>
+                    <div class="wl-card__meta"><%= listing.location %>, <%= listing.country %></div>
+                    <div class="wl-price mt-1">
+                        &#8377; <%= Number(listing.price).toLocaleString("en-IN") %> <small>/ night</small>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Remove from wishlist -->
+            <form method="POST" action="/listings/<%= listing._id %>/wishlist" class="position-absolute" style="top: 0.5rem; right: 0.5rem; z-index: 5;">
+                <button type="submit" class="wl-heart" aria-pressed="true" aria-label="Remove from wishlist" title="Remove from wishlist">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </button>
+            </form>
+        </article>
+        <% } %>
+    </div>
+    <% } else { %>
+    <div class="text-center py-5 my-5 rounded-4" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border);">
+        <i class="fa-regular fa-heart fs-1 text-danger mb-3 d-block"></i>
+        <h3 class="wl-h2 fw-bold">Your wishlist is empty</h3>
+        <p class="wl-muted mb-4">Click the heart icon on any stay to bookmark your favorites here.</p>
+        <a href="/listings" class="wl-btn wl-btn--primary">Discover Stays</a>
+    </div>
+    <% } %>
+</div>

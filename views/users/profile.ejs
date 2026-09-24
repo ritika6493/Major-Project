@@ -1,0 +1,147 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="my-4">
+    <div class="row g-4">
+        <!-- Profile Sidebar -->
+        <div class="col-12 col-md-4">
+            <div class="p-4 rounded-4 shadow-sm text-center mb-4" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                <img 
+                    src="<%= user.avatar ? user.avatar.url : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80' %>" 
+                    class="rounded-circle mx-auto mb-3 shadow-sm" 
+                    alt="<%= user.username %>"
+                    style="width: 110px; height: 110px; object-fit: cover;"
+                />
+                <h3 class="wl-h2 mb-1"><%= user.username %></h3>
+                <p class="wl-muted small mb-3"><%= user.email %></p>
+                
+                <div>
+                    <span class="wl-badge wl-badge--verified text-capitalize">
+                        <i class="fa-solid fa-user-shield me-1"></i>Role: <%= user.role || 'Guest' %>
+                    </span>
+                </div>
+
+                <div class="my-3 py-2 text-start small wl-muted" style="border-top: 1px solid var(--wl-border);">
+                    <div class="mb-2">
+                        <i class="fa-regular fa-calendar-check me-2 text-danger"></i>
+                        Member since <%= new Date(user.createdAt).toLocaleDateString("en-IN", { month: 'short', year: 'numeric' }) %>
+                    </div>
+                    <% if (user.phone) { %>
+                    <div class="mb-2">
+                        <i class="fa-solid fa-phone me-2 text-danger"></i>
+                        <%= user.phone %>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Update Bio Form -->
+            <div class="p-4 rounded-4 shadow-sm" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                <h4 class="wl-h3 mb-3">Profile Info</h4>
+                <form method="POST" action="/profile">
+                    <div class="wl-field">
+                        <label for="phone" class="wl-label">Phone Number</label>
+                        <input 
+                            id="phone" 
+                            name="phone" 
+                            type="text" 
+                            class="wl-input" 
+                            value="<%= user.phone || '' %>"
+                            placeholder="+91 98765 43210"
+                        />
+                    </div>
+                    <div class="wl-field">
+                        <label for="bio" class="wl-label">About You</label>
+                        <textarea 
+                            id="bio" 
+                            name="bio" 
+                            rows="3" 
+                            class="wl-textarea" 
+                            placeholder="Tell hosts & guests about yourself..."
+                        ><%= user.bio || '' %></textarea>
+                    </div>
+                    <button class="wl-btn wl-btn--primary wl-btn--block wl-btn--sm">Save Profile</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Content: Hosted Listings -->
+        <div class="col-12 col-md-8">
+            <div class="p-4 rounded-4 shadow-sm mb-4" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                    <div>
+                        <h3 class="wl-h3 mb-0">My Hosted Stays (<%= myListings.length %>)</h3>
+                        <p class="wl-muted small mb-0">Properties you own and host on Wanderlust</p>
+                    </div>
+                    <a href="/listings/new" class="wl-btn wl-btn--primary wl-btn--sm">
+                        <i class="fa-solid fa-plus me-1"></i>List Stay
+                    </a>
+                </div>
+
+                <% if (myListings && myListings.length > 0) { %>
+                <div class="row row-cols-1 row-cols-sm-2 g-3">
+                    <% for (let item of myListings) { %>
+                    <div class="col">
+                        <div class="h-100 rounded-4 overflow-hidden" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border);">
+                            <img 
+                                src="<%= item.image ? item.image.url : 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?auto=format&fit=crop&w=800&q=60' %>" 
+                                class="w-100" 
+                                alt="<%= item.title %>"
+                                style="height: 140px; object-fit: cover;"
+                            />
+                            <div class="p-3">
+                                <h4 class="wl-h3 text-truncate mb-1"><%= item.title %></h4>
+                                <p class="wl-muted small mb-2"><%= item.location %>, <%= item.country %></p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold small">&#8377; <%= Number(item.price).toLocaleString("en-IN") %> / night</span>
+                                    <div class="d-flex gap-1">
+                                        <a href="/listings/<%= item._id %>" class="wl-btn wl-btn--secondary wl-btn--sm" title="View"><i class="fa-regular fa-eye"></i></a>
+                                        <a href="/listings/<%= item._id %>/edit" class="wl-btn wl-btn--secondary wl-btn--sm" title="Edit"><i class="fa-regular fa-pen-to-square"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+                <% } else { %>
+                <div class="text-center py-5 rounded-3" style="background: var(--wl-surface-2);">
+                    <i class="fa-solid fa-house-chimney fs-2 wl-muted mb-2 d-block"></i>
+                    <h4 class="wl-h3">No listings published</h4>
+                    <p class="wl-muted small mb-3">Earn money by welcoming world travelers to your space.</p>
+                    <a href="/listings/new" class="wl-btn wl-btn--primary wl-btn--sm">List Your Space</a>
+                </div>
+                <% } %>
+            </div>
+
+            <!-- Quick Shortcuts -->
+            <div class="row g-3">
+                <div class="col-12 col-sm-6">
+                    <a href="/trips" class="text-decoration-none">
+                        <div class="p-4 rounded-4 shadow-sm" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="fa-solid fa-suitcase-rolling fs-2 text-danger"></i>
+                                <div>
+                                    <h4 class="wl-h3 text-dark mb-0">My Trips</h4>
+                                    <span class="wl-muted small">Upcoming & past bookings</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <a href="/wishlist" class="text-decoration-none">
+                        <div class="p-4 rounded-4 shadow-sm" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="fa-solid fa-heart fs-2 text-danger"></i>
+                                <div>
+                                    <h4 class="wl-h3 text-dark mb-0">Saved Wishlist</h4>
+                                    <span class="wl-muted small">View your bookmarked stays</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

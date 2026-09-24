@@ -1,0 +1,146 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="my-4">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="wl-display wl-h2 mb-1">Host Operations Dashboard</h1>
+            <p class="wl-muted small mb-0">Live revenue metrics, property health, and reservation management</p>
+        </div>
+        <a href="/listings/new" class="wl-btn wl-btn--primary">
+            <i class="fa-solid fa-plus me-1"></i>List Another Stay
+        </a>
+    </div>
+
+    <!-- KPI Stats Grid -->
+    <div class="wl-stats mb-5">
+        <div class="wl-stat shadow-sm">
+            <span class="wl-stat__label">Total Revenue</span>
+            <div class="wl-stat__value mt-2">&#8377; <%= Number(totalEarnings).toLocaleString("en-IN") %></div>
+            <span class="text-success small"><i class="fa-solid fa-arrow-trend-up me-1"></i>Confirmed stays</span>
+        </div>
+        <div class="wl-stat shadow-sm">
+            <span class="wl-stat__label">Nights Hosted</span>
+            <div class="wl-stat__value mt-2"><%= totalNightsBooked %></div>
+            <span class="wl-muted small">Total nights booked</span>
+        </div>
+        <div class="wl-stat shadow-sm">
+            <span class="wl-stat__label">Active Stays</span>
+            <div class="wl-stat__value mt-2"><%= myListings.length %></div>
+            <span class="wl-muted small">Live listings</span>
+        </div>
+        <div class="wl-stat shadow-sm">
+            <span class="wl-stat__label">Host Rating</span>
+            <div class="wl-stat__value mt-2 text-warning">
+                <i class="fa-solid fa-star text-warning me-1"></i><%= avgHostRating %>
+            </div>
+            <span class="wl-muted small">Guest rating average</span>
+        </div>
+    </div>
+
+    <!-- Incoming Reservations Section -->
+    <div class="p-4 rounded-4 shadow-sm mb-5" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+        <h3 class="wl-h3 mb-3">Recent Reservations (<%= reservations.length %>)</h3>
+        
+        <% if (reservations && reservations.length > 0) { %>
+        <div class="wl-table-wrap">
+            <table class="table table-hover align-middle mb-0 wl-table--cards">
+                <thead>
+                    <tr class="small wl-muted text-uppercase">
+                        <th>Property</th>
+                        <th>Guest</th>
+                        <th>Dates</th>
+                        <th>Nights & Guests</th>
+                        <th>Payout</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let r of reservations) { %>
+                    <tr>
+                        <td data-label="Property">
+                            <div class="d-flex align-items-center gap-2">
+                                <img 
+                                    src="<%= r.listing && r.listing.image ? r.listing.image.url : 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?auto=format&fit=crop&w=800&q=60' %>" 
+                                    class="rounded-3" 
+                                    style="width: 50px; height: 40px; object-fit: cover;"
+                                    alt=""
+                                />
+                                <div>
+                                    <b class="text-dark small d-block"><%= r.listing ? r.listing.title : 'Listing' %></b>
+                                    <span class="wl-muted" style="font-size: 0.75rem;">#<%= r.code %></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td data-label="Guest">
+                            <b class="small"><%= r.guest ? r.guest.username.split('@')[0] : 'Guest' %></b>
+                            <span class="d-block wl-muted small"><%= r.guest ? r.guest.email : '' %></span>
+                        </td>
+                        <td data-label="Dates" class="small">
+                            <%= new Date(r.checkIn).toLocaleDateString("en-IN", { month: 'short', day: 'numeric' }) %> &ndash; <%= new Date(r.checkOut).toLocaleDateString("en-IN", { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                        </td>
+                        <td data-label="Occupancy" class="small">
+                            <%= r.nights %> <%= r.nights === 1 ? 'night' : 'nights' %> &bull; <%= r.guestsCount %> <%= r.guestsCount === 1 ? 'guest' : 'guests' %>
+                        </td>
+                        <td data-label="Payout">
+                            <b class="text-dark small">&#8377; <%= Number(r.pricing ? r.pricing.total : 0).toLocaleString("en-IN") %></b>
+                        </td>
+                        <td data-label="Status">
+                            <span class="wl-badge <%= r.status === 'confirmed' ? 'wl-badge--verified' : '' %> text-capitalize">
+                                <%= r.status %>
+                            </span>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+        <% } else { %>
+        <div class="text-center py-5 rounded-3" style="background: var(--wl-surface-2);">
+            <i class="fa-regular fa-calendar-xmark fs-2 wl-muted mb-2 d-block"></i>
+            <h4 class="wl-h3">No reservations yet</h4>
+            <p class="wl-muted small mb-0">Incoming guest reservations will appear here automatically.</p>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- My Properties Overview -->
+    <div class="p-4 rounded-4 shadow-sm" style="background: var(--wl-surface); border: 1px solid var(--wl-border);">
+        <h3 class="wl-h3 mb-3">Your Stays (<%= myListings.length %>)</h3>
+        
+        <% if (myListings && myListings.length > 0) { %>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+            <% for (let item of myListings) { %>
+            <div class="col">
+                <div class="h-100 rounded-4 overflow-hidden" style="background: var(--wl-surface-2); border: 1px solid var(--wl-border);">
+                    <img 
+                        src="<%= item.image ? item.image.url : 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?auto=format&fit=crop&w=800&q=60' %>" 
+                        class="w-100" 
+                        style="height: 150px; object-fit: cover;"
+                        alt=""
+                    />
+                    <div class="p-3">
+                        <h4 class="wl-h3 text-truncate mb-1"><%= item.title %></h4>
+                        <p class="wl-muted small mb-2"><%= item.location %>, <%= item.country %></p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold small">&#8377; <%= Number(item.price).toLocaleString("en-IN") %> / night</span>
+                            <div class="d-flex gap-1">
+                                <a href="/listings/<%= item._id %>" class="wl-btn wl-btn--secondary wl-btn--sm" title="View"><i class="fa-regular fa-eye"></i></a>
+                                <a href="/listings/<%= item._id %>/edit" class="wl-btn wl-btn--secondary wl-btn--sm" title="Edit"><i class="fa-regular fa-pen-to-square"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+        <% } else { %>
+        <div class="text-center py-5 rounded-3" style="background: var(--wl-surface-2);">
+            <i class="fa-solid fa-house-chimney fs-2 wl-muted mb-2 d-block"></i>
+            <h4 class="wl-h3">No listings published</h4>
+            <p class="wl-muted small mb-3">Create your first stay to begin receiving bookings.</p>
+            <a href="/listings/new" class="wl-btn wl-btn--primary wl-btn--sm">Create Listing</a>
+        </div>
+        <% } %>
+    </div>
+</div>
